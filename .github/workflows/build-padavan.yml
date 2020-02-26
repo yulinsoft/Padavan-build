@@ -91,6 +91,8 @@ jobs:
         #########################################################################################
         sudo ./clear_tree
         sudo ./build_firmware_bkye $TNAME
+        sudo mv -f images/*.trx /opt/images/
+        ls /opt/images/
     - name: Build NEWIFI3 Firmware
       env:
         TNAME: NEWIFI3
@@ -145,6 +147,8 @@ jobs:
         #########################################################################################
         sudo ./clear_tree
         sudo ./build_firmware_bkye $TNAME
+        sudo mv -f images/*.trx /opt/images/
+        ls /opt/images/
     - name: Build YK-L1 Firmware
       env:
         TNAME: YK-L1
@@ -207,5 +211,39 @@ jobs:
       with:
         name: Padavan-packages
         path: /opt/images
+    - name: Get uploadUrl
+      run: |
+        uploadurl=`curl -s  https://github.com/yulinsoft/Padavan-build/releases/latest | sed -n '/upload_url/p' |  cut -d '"' -f 4`
+        df -h
+        pwd
+        echo $uploadurl
+        echo "::set-env name=UPLOADURL::$uploadurl"
+    - name: Upload B70 Firmware
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.MY_TOKEN }}
+      with:
+        upload_url: ${{ env.UPLOADURL }}
+        asset_path: /opt/images/B70_3.4.3.9-099.trx
+        asset_name: B70_3.4.3.9-099.trx
+        asset_content_type: application/octet-stream
+    - name: Upload Newifi3 Firmware
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.MY_TOKEN }}
+      with:
+        upload_url: ${{ env.UPLOADURL }}
+        asset_path: /opt/images/NEWIFI3_3.4.3.9-099.trx
+        asset_name: NEWIFI3_3.4.3.9-099.trx
+        asset_content_type: application/octet-stream
+    - name: Upload Youku-L1 Firmware
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.MY_TOKEN }}
+      with:
+        upload_url: ${{ env.UPLOADURL }}
+        asset_path: /opt/images/YK-L1_3.4.3.9-099.trx
+        asset_name: YK-L1_3.4.3.9-099.trx
+        asset_content_type: application/octet-stream
     - name: Build Completed
       run: curl -sSL "http://www.yulinsoft.top/dingtalk/dingmsg.php?text=Padavan编译提醒&desp=您的固件已经编译完成。"
